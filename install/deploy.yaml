@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: geolocator
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: geolocator
+  namespace: geolocator
+  labels:
+    app: geolocator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: geolocator
+  template:
+    metadata:
+      labels:
+        app: geolocator
+    spec:
+      containers:
+        - name: geolocator
+          image: ruturajmohite/geolocator:latest
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 7654
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: geolocator-external
+  namespace: geolocator
+  labels:
+    app: geolocator
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 7654
+  selector:
+    app: geolocator

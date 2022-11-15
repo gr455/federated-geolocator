@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: geolocator
+---
+apiVersion: types.kubefed.io/v1beta1
+kind: FederatedNamespace
+metadata:
+  name: geolocator
+  namespace: geolocator
+spec:
+  placement:
+    clusterSelector: {}
+---
+apiVersion: types.kubefed.io/v1beta1
+kind: FederatedDeployment
+metadata:
+  name: geolocator
+  namespace: geolocator
+spec:
+  placement:
+    clusterSelector: {}
+  template:
+    metadata:
+      name: geolocator
+      namespace: geolocator
+      labels:
+        app: geolocator
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: geolocator
+      template:
+        metadata:
+          labels:
+            app: geolocator
+        spec:
+          containers:
+            - name: geolocator
+              image: ruturajmohite/geolocator:latest
+              resources:
+                limits:
+                  memory: "256Mi"
+                  cpu: "500m"
+              ports:
+                - containerPort: 7654
+---
+apiVersion: types.kubefed.io/v1beta1
+kind: FederatedService
+metadata:
+  name: geolocator-external
+  namespace: geolocator
+spec:
+  placement:
+    clusterSelector: {}
+  template:
+    spec:
+      type: LoadBalancer
+      ports:
+        - port: 80
+          targetPort: 7654
+      selector:
+        app: geolocator
